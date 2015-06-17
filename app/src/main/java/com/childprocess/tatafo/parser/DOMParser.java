@@ -1,103 +1,81 @@
 package com.childprocess.tatafo.parser;
 
-import org.jsoup.Jsoup;
-import org.jsoup.select.Elements;
-import org.w3c.dom.Document;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
+import android.util.Log;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import com.google.code.rome.android.repackaged.com.sun.syndication.feed.synd.SyndContent;
+import com.google.code.rome.android.repackaged.com.sun.syndication.feed.synd.SyndEntry;
+import com.google.code.rome.android.repackaged.com.sun.syndication.feed.synd.SyndFeed;
+import com.google.code.rome.android.repackaged.com.sun.syndication.fetcher.FetcherException;
+import com.google.code.rome.android.repackaged.com.sun.syndication.io.FeedException;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.IOException;
+import java.util.List;
 
 public class DOMParser {
 
-	private RSSFeed _feed = new RSSFeed();
+    private RSSFeed _feed = new RSSFeed();
 
-	public RSSFeed parseXml(String xml) {
+    public RSSFeed parseXml(String xmlUrl) {
 
-		// _feed.clearList();
+        try {
+            SyndFeed f = RssAtomFeedRetriever.getMostRecentNews(xmlUrl);
+            List<SyndEntry> entries = f.getEntries();
+            StringBuilder content = new StringBuilder();
 
-		URL url = null;
-		try {
-			url = new URL(xml);
-		} catch (MalformedURLException e1) {
-			e1.printStackTrace();
-		}
+            for (SyndEntry c : entries) {
+                //clear for reuse
+                content = content.delete(0, content.length());
 
-		try {
-			// Create required instances
-			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-			DocumentBuilder db = dbf.newDocumentBuilder();
+                RSSItem item = new RSSItem();
+                item.setDate(c.getPublishedDate().toString());
+                item.setTitle(c.getTitle());
 
-			// Parse the xml
-			Document doc = db.parse(new InputSource(url.openStream()));
-			doc.getDocumentElement().normalize();
+                List contents = c.getContents();
+                if (!(contents == null || contents.isEmpty())) {
+                    //Get Content
+                    for (Object syndContent : contents) {
+                        content.append(((SyndContent) syndContent).getValue());
+                    }
+                    item.setContent(content.toString());
 
-			// Get all <item> tags.
-			NodeList nl = doc.getElementsByTagName("item");
-			int length = nl.getLength();
+                    //Try fetching image from content
+                    String img = "";
+                    String temp = content.toString().replaceAll("<", "&;").replaceAll(">", "&;");
+                    for (String string : temp.split("&;")) {
+                        if (!string.trim().matches("img[^<>]+/")) continue;
+                        int icount = 0;
+                        int i = string.indexOf("src");
+                        if (i < 0) continue;
 
-			for (int i = 0; i < length; i++) {
-				Node currentNode = nl.item(i);
-				RSSItem _item = new RSSItem();
+                        StringBuilder b = new StringBuilder();
+                        for (; i < string.length(); ++i) {
+                            if (string.charAt(i) == '\"') {
+                                ++icount;
+                                continue;
+                            }
+                            if (icount == 1) {
+                                b.append(string.charAt(i));
+                                continue;
+                            }
+                            if (icount > 1) break;
+                        }
+                        img = b.toString();
+                        break;
+                    }
 
-				NodeList nchild = currentNode.getChildNodes();
-				int clength = nchild.getLength();
+                    item.setImage(img);
+                }
 
-				// Get the required elements from each Item
-				for (int j = 0; j < clength; j = j + 1) {
+                _feed.addItem(item);
+            }
 
-					Node thisNode = nchild.item(j);
-					String theString = null;
-					String nodeName = thisNode.getNodeName();
+        } catch (FetcherException | FeedException | IOException e) {
+            Log.d("Tatafo", "Failed: " + e.getMessage());
+        }
 
-					theString = nchild.item(j).getFirstChild().getNodeValue();
+        return _feed;
 
-					if (theString != null) {
-						if ("title".equals(nodeName)) {
-							// Node name is equals to 'title' so set the Node
-							// value to the Title in the RSSItem.
-							_item.setTitle(theString);
-						}
+    }
 
-						else if ("description".equals(nodeName)) {
-							_item.setDescription(theString);
-
-							// Parse the html description to get the image url
-							String html = theString;
-							org.jsoup.nodes.Document docHtml = Jsoup
-									.parse(html);
-							Elements imgEle = docHtml.select("img");
-							_item.setImage(imgEle.attr("src"));
-						}
-
-						else if ("pubDate".equals(nodeName)) {
-
-							// We replace the plus and zero's in the date with
-							// empty string
-							String formatedDate = theString.replace(" +0000",
-									"");
-							_item.setDate(formatedDate);
-						}
-
-					}
-				}
-
-				// add item to the list
-				_feed.addItem(_item);
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		// Return the final feed once all the Items are added to the RSSFeed
-		// Object(_feed).
-		return _feed;
-	}
 
 }

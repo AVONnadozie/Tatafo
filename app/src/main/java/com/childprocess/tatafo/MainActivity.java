@@ -14,8 +14,6 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 
 
-
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -34,15 +32,10 @@ public class MainActivity extends ActionBarActivity {
         this.setTitle(null);
         toolbar = (Toolbar) findViewById(R.id.tool_bar); // Attaching the layout to the toolbar object
         toolbar.setTitle("Tatafo");
-        // toolbar.setLogo(R.mipmap.logo2);
+        toolbar.setLogo(R.mipmap.ic_launcher);
         toolbar.setTitleTextColor(getResources().getColor(R.color.textColorPrimary));
         setSupportActionBar(toolbar);
-
-
-
-//
-
-        }
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -50,6 +43,7 @@ public class MainActivity extends ActionBarActivity {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+
     public static void setListViewHeightBasedOnChildren(ListView listView) {
         ListAdapter listAdapter = listView.getAdapter();
         if (listAdapter == null)
@@ -71,6 +65,7 @@ public class MainActivity extends ActionBarActivity {
         listView.setLayoutParams(params);
         listView.requestLayout();
     }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will

@@ -22,18 +22,18 @@ public class DetailFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        fFeed = (RSSFeed)getArguments().getSerializable("feed");
+        fFeed = (RSSFeed) getArguments().getSerializable("feed");
         fPos = getArguments().getInt("pos");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.detail_fragment, container, false);
-        // Initializr views
-        TextView title = (TextView)view.findViewById(R.id.title);
-        WebView desc = (WebView)view.findViewById(R.id.desc);
+        // Initializer views
+        TextView title = (TextView) view.findViewById(R.id.title);
+        WebView desc = (WebView) view.findViewById(R.id.desc);
         // Enable the vertical fading edge (by default it is disabled)
-        ScrollView sv = (ScrollView)view.findViewById(R.id.sv);
+        ScrollView sv = (ScrollView) view.findViewById(R.id.sv);
         sv.setVerticalFadingEdgeEnabled(true);
         // Set webview properties
         WebSettings ws = desc.getSettings();
@@ -47,8 +47,7 @@ public class DetailFragment extends Fragment {
         ws.setUserAgentString("Mozilla/5.0 (Linux; U; Android 2.0; en-us; Droid Build/ESD20) AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0 Mobile Safari/530.17");
         // Set the views
         title.setText(fFeed.getItem(fPos).getTitle());
-        desc.loadDataWithBaseURL("http://www.androidcentral.com/", fFeed.getItem(fPos)
-                .getDescription(), "text/html", "UTF-8", null);
+        desc.loadDataWithBaseURL("", fFeed.getItem(fPos).getContent(), "text/html", "UTF-8", null);
         return view;
     }
 }

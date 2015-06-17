@@ -29,7 +29,7 @@ import java.io.ObjectOutputStream;
 
 public class SplashActivity extends Activity {
 
-	String RSSFEEDURL = "http://feeds.feedburner.com/androidcentral";
+	String RSSFEEDURL = "";
 	RSSFeed feed;
 	String fileName;
 
@@ -42,6 +42,7 @@ public class SplashActivity extends Activity {
 		ActionBar actionBar = getActionBar();
 		actionBar.setTitle("Tatafo");
 		actionBar.setIcon(R.mipmap.ic_launcher);
+		RSSFEEDURL=getIntent().getStringExtra("feed_url");
 		setContentView(R.layout.splash);
 		ImageView iv = (ImageView) findViewById(R.id.imageView2);
 

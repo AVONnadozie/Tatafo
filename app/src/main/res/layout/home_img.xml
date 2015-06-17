@@ -14,9 +14,8 @@
         android:layout_height="250dp"
         android:id="@+id/thumb"
         android:src="@drawable/test2"
-        android:background="@drawable/featured"
-        android:cropToPadding="true"
-        android:scaleType="center" />
+
+         />
 
     <RelativeLayout
         android:layout_width="fill_parent"
