@@ -140,7 +140,6 @@ public class feedDBAdapter {
         createFeed("Bella Naija", "http://www.bellanaija.com/feed/");
         createFeed("Too Xclusive", "http://www.tooxclusive.com/feed/");
         createFeed("Information NG", "http://www.informationng.com/feed");
-        createFeed("Ladun Liadi", "https://www.blogger.com/feeds/5820553792761826908/posts/default");
         createFeed("Sleek Naija", "http://www.sleeknaija.com/feed/");
         createFeed("YNaija", "http://ynaija.com/feed/");
         createFeed("360nobs", "http://www.360nobs.com/feed/");
