@@ -132,7 +132,6 @@ public class feedDBAdapter {
         doneDelete = mDb.delete(SQLITE_TABLE, null, null);
         Log.w(TAG, Integer.toString(doneDelete));
         return doneDelete > 0;
-
     }
 
     public void createDefaultFeedSources() {
@@ -143,6 +142,10 @@ public class feedDBAdapter {
         createFeed("Information NG", "http://www.informationng.com/feed");
         createFeed("Ladun Liadi", "https://www.blogger.com/feeds/5820553792761826908/posts/default");
         createFeed("Sleek Naija", "http://www.sleeknaija.com/feed/");
+        createFeed("YNaija", "http://ynaija.com/feed/");
+        createFeed("360nobs", "http://www.360nobs.com/feed/");
+        createFeed("Pulse.ng", "http://www.pulse.ng/rss/");
+        createFeed("Naij", "http://www.naij.com/feed/");
     }
 
 }

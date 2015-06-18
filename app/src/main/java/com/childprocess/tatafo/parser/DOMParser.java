@@ -70,7 +70,7 @@ public class DOMParser {
             }
 
         } catch (FetcherException | FeedException | IOException e) {
-            Log.d("Tatafo", "Failed: " + e.getMessage());
+            Log.d("Tatafo debug", "Failed: " + e.getMessage());
         }
 
         return _feed;
