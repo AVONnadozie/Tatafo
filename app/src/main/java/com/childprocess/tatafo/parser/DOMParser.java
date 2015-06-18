@@ -9,6 +9,7 @@ import com.google.code.rome.android.repackaged.com.sun.syndication.fetcher.Fetch
 import com.google.code.rome.android.repackaged.com.sun.syndication.io.FeedException;
 
 import java.io.IOException;
+import java.net.URL;
 import java.util.List;
 
 public class DOMParser {
@@ -20,8 +21,10 @@ public class DOMParser {
         try {
             SyndFeed f = RssAtomFeedRetriever.getMostRecentNews(xmlUrl);
             List<SyndEntry> entries = f.getEntries();
-            StringBuilder content = new StringBuilder();
+            //Try setting Feed Author
+            _feed.setAuthor(f.getAuthor());
 
+            StringBuilder content = new StringBuilder();
             for (SyndEntry c : entries) {
                 //clear for reuse
                 content = content.delete(0, content.length());
@@ -29,6 +32,11 @@ public class DOMParser {
                 RSSItem item = new RSSItem();
                 item.setDate(c.getPublishedDate().toString());
                 item.setTitle(c.getTitle());
+
+                //If feed author is not yet set, use item authors
+                if (_feed.getAuthor() == null || _feed.getAuthor().isEmpty()) {
+                     _feed.setAuthor(c.getAuthor() + " and others");
+                }
 
                 List contents = c.getContents();
                 if (!(contents == null || contents.isEmpty())) {

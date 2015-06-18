@@ -44,15 +44,19 @@ public class ListActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.feed_list);
-        ActionBar actionBar = getActionBar();
-        actionBar.setTitle("Tatafo");
-        actionBar.setIcon(R.mipmap.ic_launcher);
 
 //		// set the feed link for refresh
-        feedLink = new SplashActivity().RSSFEEDURL;
-
-        // Get feed form the file
+        feedLink = SplashActivity.RSSFEEDURL;
+        // Get feed from the file
         feed = (RSSFeed) getIntent().getExtras().get("feed");
+
+        ActionBar actionBar = getActionBar();
+        actionBar.setIcon(R.mipmap.ic_launcher);
+        if(feed == null || feed.getAuthor() == null || feed.getAuthor().isEmpty()) {
+            actionBar.setTitle("Tatafo");
+        }else{
+            actionBar.setTitle(" Posts by " + feed.getAuthor());
+        }
 
         // Initialize the variables:
         lv = (ListView) findViewById(R.id.listView);
@@ -102,7 +106,7 @@ public class ListActivity extends Activity {
                 return (true);
 
             case R.id.about_option:
-                Intent intent = new Intent(this, AddActivity.class);
+                Intent intent = new Intent(this, AboutActivity.class);
                 startActivity(intent);
                 return (true);
 

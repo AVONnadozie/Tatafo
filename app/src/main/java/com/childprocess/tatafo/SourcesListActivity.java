@@ -21,25 +21,27 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.Toast;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 /**
  * Created by Admin on 17/06/2015.
  */
-public class AddActivity extends Activity {
+public class SourcesListActivity extends Activity {
     private feedDBAdapter dbHelper;
     private SimpleCursorAdapter dataAdapter;
     private ArrayList<String> FeedNameList;
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        this.setTitle("Tatafo Sources");
-        setContentView(R.layout.activity_add);
+        this.setTitle("Tatafo");
+        setContentView(R.layout.activity_sources_list);
         ListView FeedList = (ListView) findViewById(R.id.list_feeds);
         dbHelper = new feedDBAdapter(this);
         dbHelper.open();
 
-        dbHelper.deleteFeedSources();
+        //dbHelper.deleteFeedSources(); //For debugging purposes only
         dbHelper.createDefaultFeedSources();
 
         displayListView();
@@ -56,8 +58,12 @@ public class AddActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.add:
-
                 displaydiaog();
+                break;
+            case R.id.about:
+                Intent intent = new Intent(this, AboutActivity.class);
+                startActivity(intent);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -65,7 +71,7 @@ public class AddActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds feeds to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.activity_add, menu);
+        getMenuInflater().inflate(R.menu.activity_sources_list, menu);
         return true;
     }
 
@@ -74,31 +80,31 @@ public class AddActivity extends Activity {
         layout.setOrientation(LinearLayout.VERTICAL);
 
         final EditText feedname = new EditText(this);
-        feedname.setHint("Feed Name");
+        feedname.setHint("Source Name");
         layout.addView(feedname);
 
         final EditText feedurl = new EditText(this);
         feedurl.setHint("http://");
         layout.addView(feedurl);
 
-
         LayoutInflater factory = LayoutInflater.from(this);
-
-//text_entry is an Layout XML file containing two text field to display in alert dialog
-
-
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
         alert.setIcon(R.mipmap.ic_launcher).setTitle("Enter New Feed Data:").setView(layout).setPositiveButton("Save",
                 new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog,
                                         int whichButton) {
-
                         Log.i("AlertDialog", "TextEntry 1 Entered " + feedname.getText().toString());
                         Log.i("AlertDialog", "TextEntry 2 Entered " + feedurl.getText().toString());
-    /* User clicked OK so do some stuff */
-                        dbHelper.createFeed(feedname.getText().toString(), feedurl.getText().toString());
-                        displayListView();
+                        /* User clicked OK so do some stuff */
+                        try {
+                            URL url = new URL(feedurl.getText().toString());
+                            dbHelper.createFeedSource(feedname.getText().toString(), feedurl.getText().toString());
+                            displayListView();
+                        } catch (MalformedURLException e) {
+                            Toast.makeText(getApplicationContext(),"Invalid URL, URLs should be in the format http://www.domain.com",
+                                    Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }).setNegativeButton("Cancel",
                 new DialogInterface.OnClickListener() {
@@ -145,7 +151,7 @@ public class AddActivity extends Activity {
                 // Get the cursor, positioned to the corresponding row in the result set
                 Cursor cursor = (Cursor) listView.getItemAtPosition(position);
                 String Url = cursor.getString(cursor.getColumnIndexOrThrow("name"));
-                Intent i = new Intent(AddActivity.this, SplashActivity.class);
+                Intent i = new Intent(SourcesListActivity.this, SplashActivity.class);
                 i.putExtra("feed_url", Url);
                 startActivity(i);
             }

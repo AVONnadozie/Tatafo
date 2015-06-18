@@ -40,6 +40,7 @@ public class DetailFragment extends Fragment {
         ws.setLightTouchEnabled(false);
         ws.setPluginState(PluginState.ON);
         ws.setJavaScriptEnabled(true);
+        //ws.setf
         ws.setLoadWithOverviewMode(true);
         ws.setUseWideViewPort(true);
         ws.setLayoutAlgorithm(LayoutAlgorithm.SINGLE_COLUMN);

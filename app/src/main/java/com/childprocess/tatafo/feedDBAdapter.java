@@ -82,18 +82,6 @@ public class feedDBAdapter {
         }
     }
 
-    public long createFeed(String name,
-                           String url) {
-
-        ContentValues initialValues = new ContentValues();
-        initialValues.put(KEY_Url, url);
-        initialValues.put(KEY_NAME, name);
-
-
-        return mDb.insert(SQLITE_TABLE, null, initialValues);
-    }
-
-
     public Cursor fetchfeedByName(String inputText) throws SQLException {
         Log.w(TAG, inputText);
         Cursor mCursor = null;
@@ -134,17 +122,27 @@ public class feedDBAdapter {
         return doneDelete > 0;
     }
 
+    public long createFeedSource(String name, String url) {
+
+        ContentValues initialValues = new ContentValues();
+        initialValues.put(KEY_Url, url);
+        initialValues.put(KEY_NAME, name);
+
+        //Do not make changes if row already exists
+        return mDb.insertWithOnConflict(SQLITE_TABLE, null, initialValues, SQLiteDatabase.CONFLICT_IGNORE);
+    }
+
     public void createDefaultFeedSources() {
-        createFeed("Linda Ikeji", "http://feeds.feedburner.com/blogspot/OqshX");
-        createFeed("Naija Loaded", "http://www.naijaloaded.com.ng/feed/");
-        createFeed("Bella Naija", "http://www.bellanaija.com/feed/");
-        createFeed("Too Xclusive", "http://www.tooxclusive.com/feed/");
-        createFeed("Information NG", "http://www.informationng.com/feed");
-        createFeed("Sleek Naija", "http://www.sleeknaija.com/feed/");
-        createFeed("YNaija", "http://ynaija.com/feed/");
-        createFeed("360nobs", "http://www.360nobs.com/feed/");
-        createFeed("Pulse.ng", "http://www.pulse.ng/rss/");
-        createFeed("Naij", "http://www.naij.com/feed/");
+        createFeedSource("Linda Ikeji", "http://feeds.feedburner.com/blogspot/OqshX");
+        createFeedSource("Naija Loaded", "http://www.naijaloaded.com.ng/feed/");
+        createFeedSource("Bella Naija", "http://www.bellanaija.com/feed/");
+        createFeedSource("Too Xclusive", "http://www.tooxclusive.com/feed/");
+        createFeedSource("Information NG", "http://www.informationng.com/feed");
+        createFeedSource("Sleek Naija", "http://www.sleeknaija.com/feed/");
+        createFeedSource("YNaija", "http://ynaija.com/feed/");
+        createFeedSource("360nobs", "http://www.360nobs.com/feed/");
+        createFeedSource("Pulse.ng", "http://www.pulse.ng/rss/");
+        createFeedSource("Naij", "http://www.naij.com/feed/");
     }
 
 }

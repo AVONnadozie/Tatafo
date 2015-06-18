@@ -9,6 +9,7 @@ public class RSSFeed implements Serializable {
 
     private static final long serialVersionUID = 1L;
     private List<RSSItem> _itemlist;
+    private String author = "";
 
     RSSFeed() {
         _itemlist = new ArrayList<>();
@@ -26,4 +27,11 @@ public class RSSFeed implements Serializable {
         return _itemlist.size();
     }
 
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
 }

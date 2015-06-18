@@ -3,7 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/add"
-        android:icon="@drawable/addnew"
+        android:icon="@drawable/ic_action_add"
         android:showAsAction="ifRoom"
         android:title="Add New"/>
+    <item
+        android:id="@+id/about"
+        android:icon="@drawable/action_about"
+        android:showAsAction="ifRoom"
+        android:title="About Me"/>
 </menu>

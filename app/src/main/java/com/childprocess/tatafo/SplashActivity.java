@@ -29,7 +29,7 @@ import java.io.ObjectOutputStream;
 
 public class SplashActivity extends Activity {
 
-	String RSSFEEDURL = "";
+	static String RSSFEEDURL = "";
 	RSSFeed feed;
 	String fileName;
 
@@ -59,7 +59,6 @@ public class SplashActivity extends Activity {
 
 			// No connectivity. Check if feed File exists
 			if (!feedFile.exists()) {
-
 				// No connectivity & Feed file doesn't exist: Show alert to exit
 				// & check for connectivity
 				AlertDialog.Builder builder = new AlertDialog.Builder(this);
