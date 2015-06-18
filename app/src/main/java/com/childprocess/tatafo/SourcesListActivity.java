@@ -43,8 +43,9 @@ public class SourcesListActivity extends Activity {
 
         //dbHelper.deleteFeedSources(); //For debugging purposes only
         dbHelper.createDefaultFeedSources();
-
         displayListView();
+
+        //Delete option for feed source
         FeedList.setOnItemLongClickListener(new ListView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> FeedList, View view, int i, long l) {
@@ -92,18 +93,22 @@ public class SourcesListActivity extends Activity {
 
         alert.setIcon(R.mipmap.ic_launcher).setTitle("Enter New Feed Data:").setView(layout).setPositiveButton("Save",
                 new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,
-                                        int whichButton) {
-                        Log.i("AlertDialog", "TextEntry 1 Entered " + feedname.getText().toString());
-                        Log.i("AlertDialog", "TextEntry 2 Entered " + feedurl.getText().toString());
+                    public void onClick(DialogInterface dialog, int whichButton) {
                         /* User clicked OK so do some stuff */
-                        try {
-                            URL url = new URL(feedurl.getText().toString());
-                            dbHelper.createFeedSource(feedname.getText().toString(), feedurl.getText().toString());
-                            displayListView();
-                        } catch (MalformedURLException e) {
-                            Toast.makeText(getApplicationContext(),"Invalid URL, URLs should be in the format http://www.domain.com",
-                                    Toast.LENGTH_SHORT).show();
+                        if (!feedname.getText().toString().isEmpty()) {
+                            try {
+                                URL url = new URL(feedurl.getText().toString());
+                                dbHelper.createFeedSource(feedname.getText().toString(), feedurl.getText().toString());
+                                displayListView();
+
+                            } catch (MalformedURLException e) {
+                                Toast.makeText(getApplicationContext(),
+                                        "Invalid URL, URLs should be in the format http://www.domain.com",
+                                        Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+                            Toast.makeText(getApplicationContext(), "Source name is empty",
+                                    Toast.LENGTH_LONG).show();
                         }
                     }
                 }).setNegativeButton("Cancel",

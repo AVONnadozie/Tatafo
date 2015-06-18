@@ -68,7 +68,7 @@ public class ListActivity extends Activity {
             lv.setAdapter(adapter);
         }
         else{
-            Toast.makeText(getApplicationContext(), "News not currently available for this source",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "News not currently available for this source",Toast.LENGTH_LONG).show();
         }
 
         // Set on item click listener to the ListView
