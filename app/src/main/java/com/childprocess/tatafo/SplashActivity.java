@@ -6,193 +6,207 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.Window;
-import android.view.WindowManager;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.Toast;
 
 
-import com.childprocess.tatafo.image.ImageLoader;
+import com.childprocess.tatafo.data.FeedContract;
 import com.childprocess.tatafo.parser.DOMParser;
 import com.childprocess.tatafo.parser.RSSFeed;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URL;
 
 public class SplashActivity extends Activity {
 
-	static String RSSFEEDURL = "";
-	RSSFeed feed;
-	String fileName;
+    static String RSS_FEED_URL;
+    RSSFeed feed;
+    String fileName;
 
-	@Override
-	protected void onCreate(Bundle savedInstanceState) {
-		super.onCreate(savedInstanceState);
-//		requestWindowFeature(Window.FEATURE_NO_TITLE);
-//		getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-//				WindowManager.LayoutParams.FLAG_FULLSCREEN);
-		ActionBar actionBar = getActionBar();
-		actionBar.setTitle("Tatafo");
-		actionBar.setIcon(R.mipmap.ic_launcher);
-		RSSFEEDURL=getIntent().getStringExtra("feed_url");
-		setContentView(R.layout.splash);
-		ImageView iv = (ImageView) findViewById(R.id.imageView2);
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ActionBar actionBar = getActionBar();
+        actionBar.setTitle("Tatafo");
+        actionBar.setIcon(R.mipmap.ic_launcher);
+        setContentView(R.layout.splash);
+        if (savedInstanceState != null && savedInstanceState.containsKey("feed")) {
+            loadFeed(savedInstanceState.getString("feed"));
+        } else {
+            loadFeed(getIntent().getStringExtra("feed_url"));
+        }
+    }
 
-		Animation rotation = AnimationUtils.loadAnimation(getApplication(),
-				R.anim.refresh_rotate);
-		rotation.setRepeatCount(Animation.INFINITE);
-		iv.startAnimation(rotation);
-		fileName = "TDRSSFeeds.td";
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putString("feed", RSS_FEED_URL);
+    }
 
-		File feedFile = getBaseContext().getFileStreamPath(fileName);
+    @Override
+    protected void onStop() {
+        super.onStop();
+    }
 
-		ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		if (conMgr.getActiveNetworkInfo() == null) {
+    private void loadFeed(String feedUrl) {
+        RSS_FEED_URL = feedUrl;
 
-			// No connectivity. Check if feed File exists
-			if (!feedFile.exists()) {
-				// No connectivity & Feed file doesn't exist: Show alert to exit
-				// & check for connectivity
-				AlertDialog.Builder builder = new AlertDialog.Builder(this);
-				builder.setMessage(
-						"Unable to reach server, \nPlease check your connectivity.")
-						.setTitle("Tatafo")
-						.setCancelable(false)
-						.setPositiveButton("Exit",
-								new DialogInterface.OnClickListener() {
-									@Override
-									public void onClick(DialogInterface dialog,
-											int id) {
-										finish();
-									}
-								});
+        ImageView iv = (ImageView) findViewById(R.id.imageView2);
+        Animation rotation = AnimationUtils.loadAnimation(getApplication(),
+                R.anim.refresh_rotate);
+        rotation.setRepeatCount(Animation.INFINITE);
+        iv.startAnimation(rotation);
 
-				AlertDialog alert = builder.create();
-				alert.show();
-			} else {
+        Uri uri = FeedContract.buildUriForSourceUri(feedUrl);
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null, null);
+        File feedFile = null;
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            int index = cursor.getColumnIndex(FeedContract.COLUMN_NAME);
+            fileName = cursor.getString(index) + ".td";
+            feedFile = getBaseContext().getFileStreamPath(fileName);
+        } else {
+            fileName = "";
+        }
 
-				// No connectivty and file exists: Read feed from the File
-				Toast toast = Toast.makeText(this,
-						"No connectivity! Reading last update...",
-						Toast.LENGTH_LONG);
-				toast.show();
-				feed = ReadFeed(fileName);
-				startListActivity(feed);
-			}
+        ConnectivityManager conMgr = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        if (conMgr.getActiveNetworkInfo() == null) {
+            // No connectivity. Check if feed File for this feed exists
+            if (fileName.isEmpty() || feedFile == null || !feedFile.exists()) {
+                // No connectivity & Feed file doesn't exist: Show alert to exit
+                // & check for connectivity
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(
+                        "Unable to reach server, \nPlease check your connectivity.")
+                        .setTitle("Tatafo")
+                        .setCancelable(false)
+                        .setPositiveButton("Exit",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        finish();
+                                    }
+                                });
 
-		} else {
+                AlertDialog alert = builder.create();
+                alert.show();
+            } else {
+                // No connectivty and file exists: Read feed from the File
+                Toast toast = Toast.makeText(this,
+                        "No connectivity! Reading last update...",
+                        Toast.LENGTH_LONG);
+                toast.show();
+                feed = ReadFeed(fileName);
+                startListActivity(feed);
+            }
 
-			// Connected - Start parsing
-			new AsyncLoadXMLFeed().execute();
+        } else {
+            // Connected - Start parsing
+            AsyncLoadXMLFeed async = new AsyncLoadXMLFeed();
+            async.execute();
+        }
+    }
 
-		}
+    private void startListActivity(RSSFeed feed) {
 
-	}
+        Bundle bundle = new Bundle();
+        bundle.putSerializable("feed", feed);
 
-	private void startListActivity(RSSFeed feed) {
+        // launch List activity
+        Intent intent = new Intent(SplashActivity.this, ListActivity.class);
+        intent.putExtras(bundle);
+        startActivity(intent);
 
-		Bundle bundle = new Bundle();
-		bundle.putSerializable("feed", feed);
+        // kill this activity
+        finish();
+    }
 
-		// launch List activity
-		Intent intent = new Intent(SplashActivity.this, ListActivity.class);
-		intent.putExtras(bundle);
-		startActivity(intent);
+    // Method to write the feed to the File
+    private void WriteFeed(RSSFeed data) {
 
-		// kill this activity
-		finish();
+        FileOutputStream fOut = null;
+        ObjectOutputStream osw = null;
 
-	}
+        try {
+            fOut = openFileOutput(fileName, MODE_PRIVATE);
+            osw = new ObjectOutputStream(fOut);
+            osw.writeObject(data);
+            osw.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fOut.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
-	private class AsyncLoadXMLFeed extends AsyncTask<Void, Void, Void> {
+    // Method to read the feed from the File
+    private RSSFeed ReadFeed(String fName) {
 
-		@Override
-		protected Void doInBackground(Void... params) {
+        FileInputStream fIn = null;
+        ObjectInputStream isr = null;
 
-			// Obtain feed
-			DOMParser myParser = new DOMParser();
-			feed = myParser.parseXml(RSSFEEDURL);
-			if (feed != null && feed.getItemCount() > 0)
-				WriteFeed(feed);
-			return null;
+        RSSFeed feed = null;
+        File feedFile = getBaseContext().getFileStreamPath(fileName);
+        if (!feedFile.exists())
+            return null;
 
-		}
+        try {
+            fIn = openFileInput(fName);
+            isr = new ObjectInputStream(fIn);
 
-		@Override
-		protected void onPostExecute(Void result) {
-			super.onPostExecute(result);
+            feed = (RSSFeed) isr.readObject();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                fIn.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
 
-			startListActivity(feed);
-		}
+        return feed;
 
-	}
+    }
 
-	// Method to write the feed to the File
-	private void WriteFeed(RSSFeed data) {
+    private class AsyncLoadXMLFeed extends AsyncTask<Void, Void, Void> {
 
-		FileOutputStream fOut = null;
-		ObjectOutputStream osw = null;
+        @Override
+        protected Void doInBackground(Void... params) {
+            // Obtain feed
+            DOMParser myParser = new DOMParser();
+            feed = myParser.parseXml(RSS_FEED_URL);
+            if (feed != null && feed.getItemCount() > 0)
+                WriteFeed(feed);
+            return null;
 
-		try {
-			fOut = openFileOutput(fileName, MODE_PRIVATE);
-			osw = new ObjectOutputStream(fOut);
-			osw.writeObject(data);
-			osw.flush();
-		}
+        }
 
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            startListActivity(feed);
+        }
 
-		finally {
-			try {
-				fOut.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	// Method to read the feed from the File
-	private RSSFeed ReadFeed(String fName) {
-
-		FileInputStream fIn = null;
-		ObjectInputStream isr = null;
-
-		RSSFeed _feed = null;
-		File feedFile = getBaseContext().getFileStreamPath(fileName);
-		if (!feedFile.exists())
-			return null;
-
-		try {
-			fIn = openFileInput(fName);
-			isr = new ObjectInputStream(fIn);
-
-			_feed = (RSSFeed) isr.readObject();
-		}
-
-		catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		finally {
-			try {
-				fIn.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-
-		return _feed;
-
-	}
+    }
 
 }

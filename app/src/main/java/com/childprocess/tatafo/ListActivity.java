@@ -2,8 +2,13 @@ package com.childprocess.tatafo;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -16,17 +21,23 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.childprocess.tatafo.data.FeedContract;
 import com.childprocess.tatafo.image.ImageLoader;
 import com.childprocess.tatafo.parser.DOMParser;
 import com.childprocess.tatafo.parser.RSSFeed;
 
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+
+import java.io.File;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class ListActivity extends Activity {
 
@@ -45,17 +56,30 @@ public class ListActivity extends Activity {
 
         setContentView(R.layout.feed_list);
 
-//		// set the feed link for refresh
-        feedLink = SplashActivity.RSSFEEDURL;
+        // set the feed link for refresh
+        feedLink = SplashActivity.RSS_FEED_URL;
         // Get feed from the file
         feed = (RSSFeed) getIntent().getExtras().get("feed");
 
         ActionBar actionBar = getActionBar();
         actionBar.setIcon(R.mipmap.ic_launcher);
-        if(feed == null || feed.getAuthor() == null || feed.getAuthor().isEmpty()) {
+
+        String author;
+        Uri uri = FeedContract.buildUriForSourceUri(feedLink);
+        Cursor cursor = getContentResolver().query(uri, null, null, null, null, null);
+        File feedFile = null;
+        if (cursor.getCount() > 0) {
+            cursor.moveToFirst();
+            int index = cursor.getColumnIndex(FeedContract.COLUMN_NAME);
+            author = cursor.getString(index);
+        } else {
+            author = "";
+        }
+
+        if (author.isEmpty()) {
             actionBar.setTitle("Tatafo");
-        }else{
-            actionBar.setTitle(" Posts by " + feed.getAuthor());
+        } else {
+            actionBar.setTitle(author);
         }
 
         // Initialize the variables:
@@ -64,11 +88,10 @@ public class ListActivity extends Activity {
 
         // Set an Adapter to the ListView
         adapter = new CustomListAdapter(this);
-        if(adapter != null && !adapter.isEmpty()) {
+        if (adapter != null && !adapter.isEmpty()) {
             lv.setAdapter(adapter);
-        }
-        else{
-            Toast.makeText(getApplicationContext(), "News not currently available for this source",Toast.LENGTH_LONG).show();
+        } else {
+            Toast.makeText(getApplicationContext(), "News not currently available for this source", Toast.LENGTH_LONG).show();
         }
 
         // Set on item click listener to the ListView
@@ -94,13 +117,17 @@ public class ListActivity extends Activity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        new MenuInflater(this).inflate(R.menu.activity_main, menu);
+        new MenuInflater(this).inflate(R.menu.activity_list, menu);
         return (super.onCreateOptionsMenu(menu));
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.delete_option:
+                displaydiaog();
+                return true;
+
             case R.id.refresh_option:
                 refreshList(item);
                 return (true);
@@ -112,6 +139,46 @@ public class ListActivity extends Activity {
 
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    void displaydiaog() {
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        LayoutInflater factory = LayoutInflater.from(this);
+        final AlertDialog.Builder alert = new AlertDialog.Builder(this);
+
+        alert.setIcon(R.mipmap.ic_launcher)
+                .setTitle("Delete source?")
+                .setView(layout)
+                .setPositiveButton("Yes, I am Sure",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                        /* User clicked OK so do some stuff */
+                                Uri uri = FeedContract.buildUriForSourceUri(feedLink);
+                                Cursor cursor = getContentResolver().query(uri, null, null, null, null, null);
+                                if (cursor.getCount() > 0) {
+                                    cursor.moveToFirst();
+                                    //Delete feed file
+                                    int index = cursor.getColumnIndex(FeedContract.COLUMN_NAME);
+                                    String fileName = cursor.getString(index) + ".td";
+                                    File feedFile = getBaseContext().getFileStreamPath(fileName);
+                                    if (feedFile.delete()) {
+                                        //Delete from database
+                                        int row = getContentResolver().delete(uri, null, null);
+                                        if (row > 0)
+                                            finish();
+                                    }
+                                }
+                            }
+                        })
+                .setNegativeButton("No",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                //Do nothing
+                            }
+                        });
+        alert.show();
     }
 
     public void refreshList(final MenuItem item) {
@@ -141,7 +208,6 @@ public class ListActivity extends Activity {
                     public void run() {
                         if (feed != null && feed.getItemCount() > 0) {
                             adapter.notifyDataSetChanged();
-                            // lv.setAdapter(adapter);
                             item.getActionView().clearAnimation();
                             item.setActionView(null);
                         }
@@ -166,7 +232,6 @@ public class ListActivity extends Activity {
         public ImageLoader imageLoader;
 
         public CustomListAdapter(ListActivity activity) {
-
             layoutInflater = (LayoutInflater) activity
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             imageLoader = new ImageLoader(activity.getApplicationContext());
@@ -174,7 +239,6 @@ public class ListActivity extends Activity {
 
         @Override
         public int getCount() {
-
             // Set the total list item count
             return feed.getItemCount();
         }
@@ -203,8 +267,7 @@ public class ListActivity extends Activity {
         public View getView(int position, View convertView, ViewGroup parent) {
             View listItem = convertView;
 
-// Initialize the views in the layout
-
+            // Initialize the views in the layout
             int pos = getItemViewType(position);
             if (listItem == null) {
                 if (pos == 0) {
@@ -217,10 +280,7 @@ public class ListActivity extends Activity {
                     imageLoader.DisplayImage(feed.getItem(pos).getImage(), iv, false, getApplicationContext());
                     tvTitle.setText(feed.getItem(pos).getTitle());
                     tvDate.setText(feed.getItem(pos).getDate());
-
-
                 } else {
-                    //Toast.makeText(getApplicationContext(), "Value"+ ,Toast.LENGTH_SHORT).show();
                     listItem = layoutInflater.inflate(R.layout.row, null);
                 }
                 iv = (ImageView) listItem.findViewById(R.id.thumb);
@@ -231,10 +291,6 @@ public class ListActivity extends Activity {
                 tvTitle.setText(feed.getItem(pos).getTitle());
                 tvDate.setText(feed.getItem(pos).getDate());
             }
-
-
-            // Set the views in the layout
-
 
             return listItem;
         }

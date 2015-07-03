@@ -40,15 +40,19 @@ public class DetailFragment extends Fragment {
         ws.setLightTouchEnabled(false);
         ws.setPluginState(PluginState.ON);
         ws.setJavaScriptEnabled(true);
-        //ws.setf
+
+        //MODIFIED
+        ws.setMinimumFontSize(20);
+        ws.setDefaultFontSize(20);
+        ws.setLoadsImagesAutomatically(false);
+
         ws.setLoadWithOverviewMode(true);
         ws.setUseWideViewPort(true);
-        ws.setLayoutAlgorithm(LayoutAlgorithm.SINGLE_COLUMN);
         ws.setBuiltInZoomControls(true);
         ws.setUserAgentString("Mozilla/5.0 (Linux; U; Android 2.0; en-us; Droid Build/ESD20) AppleWebKit/530.17 (KHTML, like Gecko) Version/4.0 Mobile Safari/530.17");
         // Set the views
         title.setText(fFeed.getItem(fPos).getTitle());
-        desc.loadDataWithBaseURL("", fFeed.getItem(fPos).getContent(), "text/html", "UTF-8", null);
+        desc.loadData(fFeed.getItem(fPos).getContent(), "text/html", "UTF-8");
         return view;
     }
 }

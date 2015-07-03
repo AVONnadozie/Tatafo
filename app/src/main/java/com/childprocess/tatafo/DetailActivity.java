@@ -49,7 +49,7 @@ public class DetailActivity extends FragmentActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        new MenuInflater(this).inflate(R.menu.activity_desc, menu);
+        new MenuInflater(this).inflate(R.menu.activity_detail, menu);
 
         // Locate MenuItem with ShareActionProvider
         MenuItem shareItem = menu.findItem(R.id.share_option);

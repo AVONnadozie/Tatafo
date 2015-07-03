@@ -2,13 +2,17 @@ package com.childprocess.tatafo;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.CursorLoader;
+import android.support.v4.content.Loader;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,7 +23,10 @@ import android.widget.FilterQueryProvider;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import com.childprocess.tatafo.data.FeedContract;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -29,7 +36,6 @@ import java.util.ArrayList;
  * Created by Admin on 17/06/2015.
  */
 public class SourcesListActivity extends Activity {
-    private feedDBAdapter dbHelper;
     private SimpleCursorAdapter dataAdapter;
     private ArrayList<String> FeedNameList;
 
@@ -37,24 +43,15 @@ public class SourcesListActivity extends Activity {
         super.onCreate(savedInstanceState);
         this.setTitle("Tatafo");
         setContentView(R.layout.activity_sources_list);
-        ListView FeedList = (ListView) findViewById(R.id.list_feeds);
-        dbHelper = new feedDBAdapter(this);
-        dbHelper.open();
-
-        //dbHelper.deleteFeedSources(); //For debugging purposes only
-        dbHelper.createDefaultFeedSources();
         displayListView();
-
-        //Delete option for feed source
-        FeedList.setOnItemLongClickListener(new ListView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> FeedList, View view, int i, long l) {
-                // Toast.makeText(getApplicationContext(),pos)
-                return false;
-            }
-        });
-
     }
+
+//    @Override
+//    protected void onPostCreate(Bundle savedInstanceState) {
+//        super.onPostCreate(savedInstanceState);
+//        LoaderLoadXMLFeed loadXMLFeed = new LoaderLoadXMLFeed();
+//        getLoaderManager().initLoader(1,savedInstanceState, (android.app.LoaderManager.LoaderCallbacks<Object>) loadXMLFeed);
+//    }
 
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -91,71 +88,106 @@ public class SourcesListActivity extends Activity {
         LayoutInflater factory = LayoutInflater.from(this);
         final AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
-        alert.setIcon(R.mipmap.ic_launcher).setTitle("Enter New Feed Data:").setView(layout).setPositiveButton("Save",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int whichButton) {
+        alert.setIcon(R.mipmap.ic_launcher)
+                .setTitle("Enter New Feed Data:")
+                .setView(layout)
+                .setPositiveButton("Save",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
                         /* User clicked OK so do some stuff */
-                        if (!feedname.getText().toString().isEmpty()) {
-                            try {
-                                URL url = new URL(feedurl.getText().toString());
-                                dbHelper.createFeedSource(feedname.getText().toString(), feedurl.getText().toString());
-                                displayListView();
+                                if (!feedname.getText().toString().isEmpty()) {
+                                    try {
+                                        URL url = new URL(feedurl.getText().toString());
+                                        //Validate URL
+                                        if (validateURL(url)) {
+                                            ContentValues v = new ContentValues(2);
+                                            v.put(FeedContract.COLUMN_NAME, feedname.getText().toString());
+                                            v.put(FeedContract.COLUMN_URI, url.toString());
+                                            getContentResolver().insert(FeedContract.CONTENT_URI, v);
+                                            displayListView();
+                                        } else {
+                                            Toast.makeText(getApplicationContext(),
+                                                    "URL is not a feed source",
+                                                    Toast.LENGTH_LONG).show();
+                                        }
+                                    } catch (MalformedURLException e) {
+                                        Toast.makeText(getApplicationContext(),
+                                                "Invalid URL, URLs should be in the format http://www.domain.com",
+                                                Toast.LENGTH_LONG).show();
+                                    }
+                                } else {
+                                    Toast.makeText(getApplicationContext(), "Source name is empty",
+                                            Toast.LENGTH_LONG).show();
 
-                            } catch (MalformedURLException e) {
-                                Toast.makeText(getApplicationContext(),
-                                        "Invalid URL, URLs should be in the format http://www.domain.com",
-                                        Toast.LENGTH_LONG).show();
+                                }
                             }
-                        } else {
-                            Toast.makeText(getApplicationContext(), "Source name is empty",
-                                    Toast.LENGTH_LONG).show();
-                        }
-                    }
-                }).setNegativeButton("Cancel",
-                new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog,
-                                        int whichButton) {
-     /*
-     * User clicked cancel so do some stuff
-     */
-                    }
-                });
+                        })
+                .setNegativeButton("Cancel",
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                //Do nothing
+                            }
+                        });
         alert.show();
     }
 
+    private boolean validateURL(URL url) {
+        //Not implemented (for now :) )
+        return true;
+    }
+
     private void displayListView() {
-        Cursor cursor = dbHelper.fetchAllfeeds();
+        Cursor cursor = getContentResolver().query(FeedContract.CONTENT_URI,
+                null,
+                null,
+                null,
+                null);
+
         String[] columns = new String[]{
-                feedDBAdapter.KEY_Url,
-                feedDBAdapter.KEY_NAME
-
-
+                FeedContract.COLUMN_URI,
+                FeedContract.COLUMN_NAME
         };
+
         int[] to = new int[]{
                 R.id.url,
                 R.id.name,
-
         };
+
         // create the adapter using the cursor pointing to the desired data
         //as well as the layout information
         dataAdapter = new SimpleCursorAdapter(
-                this, R.layout.add_item,
+                this,
+                R.layout.add_item,
                 cursor,
                 columns,
                 to,
                 0);
+
+//        dataAdapter.setViewBinder(new SimpleCursorAdapter.ViewBinder() {
+//            @Override
+//            public boolean setViewValue(View view, Cursor cursor, int columnIndex) {
+//                switch (columnIndex){
+//                    //Set contents for only index 1 and 2
+//                    case 0:
+//                    case 1:
+//                        TextView textView = (TextView) view;
+//                        textView.setText(cursor.getString(columnIndex));
+//                        return true;
+//                    default:
+//                        return false;
+//                }
+//            }
+//        });
+
         ListView listView = (ListView) findViewById(R.id.list_feeds);
-        // Assign adapter to ListView
         listView.setAdapter(dataAdapter);
-
-
         listView.setOnItemClickListener(new ListView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> listView, View view,
                                     int position, long id) {
                 // Get the cursor, positioned to the corresponding row in the result set
                 Cursor cursor = (Cursor) listView.getItemAtPosition(position);
-                String Url = cursor.getString(cursor.getColumnIndexOrThrow("name"));
+                String Url = cursor.getString(cursor.getColumnIndexOrThrow(FeedContract.COLUMN_URI));
                 Intent i = new Intent(SourcesListActivity.this, SplashActivity.class);
                 i.putExtra("feed_url", Url);
                 startActivity(i);
@@ -180,11 +212,37 @@ public class SourcesListActivity extends Activity {
 
         dataAdapter.setFilterQueryProvider(new FilterQueryProvider() {
             public Cursor runQuery(CharSequence constraint) {
-                return dbHelper.fetchfeedByName(constraint.toString());
+                Uri uri = FeedContract.buildUriForSourceName(constraint.toString());
+                return getContentResolver().query(uri, null, null, null, null);
             }
         });
 
     }
 
+    private class LoaderLoadXMLFeed implements LoaderManager.LoaderCallbacks<Cursor> {
+
+        @Override
+        public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+            return new CursorLoader(getApplicationContext(),
+                    FeedContract.CONTENT_URI,
+                    new String[]{
+                            FeedContract.COLUMN_URI,
+                            FeedContract.COLUMN_NAME
+                    },
+                    null,
+                    null,
+                    null);
+        }
+
+        @Override
+        public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+            dataAdapter.swapCursor(data);
+        }
+
+        @Override
+        public void onLoaderReset(Loader<Cursor> loader) {
+            dataAdapter.swapCursor(null);
+        }
+    }
 
 }
