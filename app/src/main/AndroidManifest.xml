@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.childprocess.tatafo" >
+    package="com.yellowbambara.tatafo" >
 
     <uses-sdk android:minSdkVersion="14" />
 
@@ -18,27 +18,26 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/CustomActionBarTheme" >
-        <activity android:name=".SplashActivity" />
         <activity
-            android:name=".SourcesListActivity"
+            android:name="com.yellowbambara.tatafo.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name="com.yellowbambara.tatafo.SplashActivity" />
         <activity
-            android:name=".ListActivity"
+            android:name="com.yellowbambara.tatafo.ListActivity"
             android:configChanges="orientation" />
-        <activity android:name=".DetailActivity" />
-        <activity android:name=".MainActivity" />
+        <activity android:name="com.yellowbambara.tatafo.DetailActivity" />
         <activity
-            android:name=".AboutActivity"
+            android:name="com.yellowbambara.tatafo.AboutActivity"
             android:label="@string/title_activity_about" >
         </activity>
         <provider
-            android:authorities="com.childprocess.tatafo"
-            android:name=".data.FeedProvider"/>
+            android:authorities="com.yellowbambara.tatafo"
+            android:name="com.yellowbambara.tatafo.data.FeedProvider"/>
     </application>
 
 </manifest>
