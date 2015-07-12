@@ -1,15 +1,16 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-
-
-    <ListView
-        android:id="@+id/listView"
+    <fragment
+        android:id="@+id/list_fragment"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="1" >
-    </ListView>
+        android:layout_weight="1"
+        android:name="com.yellowbambara.tatafo.FeedListFragment"
+        tools:layout="@layout/feedlist_fragment">
+    </fragment>
 
 </LinearLayout>

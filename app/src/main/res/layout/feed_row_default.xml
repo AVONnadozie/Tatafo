@@ -4,7 +4,7 @@
     android:layout_height="100dp"
     android:orientation="vertical"
     android:padding="2dp"
-    android:background="@drawable/custom_selector_button">
+    android:background="@drawable/custom_selector_row">
 
     <ImageView
         android:id="@+id/thumb"
@@ -32,7 +32,7 @@
             android:ellipsize="end"
             android:maxLines="2"
             android:text="title"
-            android:textSize="15sp"
+            android:textSize="17sp"
             android:textColor="#fff"
             android:typeface="normal" />
 
@@ -46,9 +46,10 @@
             android:padding="2dp"
             android:text="date"
             android:textColor="#fff"
-            android:textSize="10sp"
-            android:typeface="sans"
-            android:textStyle="italic" />
+            android:textSize="12sp"
+            android:typeface="sans"/>
+            <!--android:textStyle=""-->
+
     </RelativeLayout>
 
     <ImageView

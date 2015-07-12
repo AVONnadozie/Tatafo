@@ -1,13 +1,11 @@
 package com.yellowbambara.tatafo.data;
 
 import android.content.ContentProvider;
-import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.net.Uri;
-import android.util.Log;
 
 
 /**
@@ -118,7 +116,7 @@ public class FeedProvider extends ContentProvider {
                     getContext().getContentResolver().notifyChange(uri,null);
                     return FeedContract.buildFeedUri(row);
                 } else {
-                    throw new SQLException("Failed to insert a feed_row");
+                    throw new SQLException("Failed to insert a feed_row_default");
                 }
             default:
                 throw new UnsupportedOperationException("Unknown Uri: " + uri);

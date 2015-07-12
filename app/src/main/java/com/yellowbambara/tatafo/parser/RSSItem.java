@@ -1,14 +1,17 @@
 package com.yellowbambara.tatafo.parser;
 
+import com.yellowbambara.tatafo.Utility;
+
 import java.io.Serializable;
+import java.util.Date;
 
 public class RSSItem implements Serializable {
 
     private static final long serialVersionUID = 1L;
-    private String _title = null;
-    private String _content = null;
-    private String _date = null;
-    private String _image = null;
+    private String title = null;
+    private String content = null;
+    private Date date = null;
+    private String image = null;
     private int type;
 
     public int getType() {
@@ -20,35 +23,42 @@ public class RSSItem implements Serializable {
     }
 
     void setTitle(String title) {
-        _title = title;
+        this.title = title;
     }
 
     void setContent(String content) {
-        _content = content;
+        if (content == null || content.equals("null"))
+            this.content = "";
+        else
+            this.content = content;
     }
 
-    void setDate(String pubdate) {
-        _date = pubdate;
+    void setDate(Date pubdate) {
+        date = pubdate;
     }
 
-    void setImage(String image) {
-        _image = image;
+    void setImageURL(String image) {
+        this.image = image;
     }
 
     public String getTitle() {
-        return _title;
+        return title;
     }
 
     public String getContent() {
-        return _content;
+        return content;
     }
 
     public String getDate() {
-        return _date;
+        return getFriendlyDate(date);
     }
 
     public String getImage() {
-        return _image;
+        return image;
+    }
+
+    private String getFriendlyDate(Date date) {
+        return Utility.getFriendlyDate(date);
     }
 
 }

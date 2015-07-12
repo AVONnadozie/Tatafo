@@ -25,9 +25,7 @@ public class FileCache {
 
         String filename = String.valueOf(url.hashCode());
 
-        File f = new File(cacheDir, filename);
-        return f;
-
+        return new File(cacheDir, filename);
     }
 
     public void clear() {

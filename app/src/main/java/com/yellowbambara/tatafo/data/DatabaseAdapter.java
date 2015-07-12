@@ -30,7 +30,7 @@ public class DatabaseAdapter {
 
     public long createFeedSource(ContentValues initialValues) {
         initialValues.put(DatabaseHelper.COLUMN_IS_DEFAULT, 0);
-        //Do not make changes if feed_row already exists
+        //Do not make changes if feed_row_default already exists
         return db.insertWithOnConflict(DatabaseHelper.DB_TABLE, null, initialValues, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
@@ -38,11 +38,11 @@ public class DatabaseAdapter {
         //Modified where clause to make sure a default clause is not deleted
         if (url != null && !url.isEmpty()) {
             return db.delete(DatabaseHelper.DB_TABLE,
-                    DatabaseHelper.COLUMN_URL + " = '" + url + "' and " + DatabaseHelper.COLUMN_IS_DEFAULT + " = 0",
+                    DatabaseHelper.COLUMN_URL + " = '" + url + "'",
                     null);
         } else {
             return db.delete(DatabaseHelper.DB_TABLE,
-                    DatabaseHelper.COLUMN_NAME + " = '" + name + "' and " + DatabaseHelper.COLUMN_IS_DEFAULT + " = 0",
+                    DatabaseHelper.COLUMN_NAME + " = '" + name + "'",
                     null);
         }
     }
@@ -69,18 +69,18 @@ public class DatabaseAdapter {
         initialValues.put(DatabaseHelper.COLUMN_NAME, name);
         initialValues.put(DatabaseHelper.COLUMN_IS_DEFAULT, 1);
 
-        //Do not make changes if feed_row already exists
+        //Do not make changes if feed_row_default already exists
         return db.insertWithOnConflict(DatabaseHelper.DB_TABLE, null, initialValues, SQLiteDatabase.CONFLICT_IGNORE);
     }
 
     private void createDefaultFeedSources() {
         createFeedSource("Linda Ikeji", "http://feeds.feedburner.com/blogspot/OqshX");
         createFeedSource("Naija Loaded", "http://www.naijaloaded.com.ng/feed/");
-        createFeedSource("Bella Naija", "http://www.bellanaija.com/feed/");
+//        createFeedSource("Bella Naija", "http://www.bellanaija.com/feed/");
         createFeedSource("Too Xclusive", "http://www.tooxclusive.com/feed/");
         createFeedSource("Information NG", "http://www.informationng.com/feed");
         createFeedSource("Sleek Naija", "http://www.sleeknaija.com/feed/");
-        createFeedSource("YNaija", "http://ynaija.com/feed/");
+//        createFeedSource("YNaija", "http://ynaija.com/feed/");
         createFeedSource("360nobs", "http://www.360nobs.com/feed/");
         createFeedSource("Pulse.ng", "http://www.pulse.ng/rss/");
         createFeedSource("Naij", "http://www.naij.com/feed/");

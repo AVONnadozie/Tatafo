@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
-        android:text="title"
+        android:text=""
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textStyle="bold" />
 
@@ -19,20 +19,16 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_below="@+id/title"
-        android:layout_marginTop="10dp" >
-
-        <RelativeLayout
-            android:layout_width="fill_parent"
-            android:layout_height="match_parent" >
-
+        android:layout_marginTop="10dp"
+        android:backgroundTint="#ffffffff">
             <WebView
-                android:id="@+id/desc"
+                android:id="@+id/view"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_marginTop="5dp"
                 android:scrollbarStyle="outsideOverlay"
-                android:text="desc" />
-        </RelativeLayout>
+                android:text=""
+                android:background="#ffffffff" />
     </ScrollView>
 
 </RelativeLayout>

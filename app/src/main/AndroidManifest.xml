@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.yellowbambara.tatafo" >
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.yellowbambara.tatafo" >
 
     <uses-sdk android:minSdkVersion="14" />
 
@@ -8,10 +7,8 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"
-        android:maxSdkVersion="18" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="18" />
 
     <application
         android:allowBackup="true"
@@ -26,10 +23,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="com.yellowbambara.tatafo.SplashActivity" />
-        <activity
-            android:name="com.yellowbambara.tatafo.ListActivity"
-            android:configChanges="orientation" />
+        <!--<activity-->
+            <!--android:name=".FeedListActivity"-->
+            <!--android:configChanges="orientation" />-->
+        <activity android:name=".FeedListActivity"/>
         <activity android:name="com.yellowbambara.tatafo.DetailActivity" />
         <activity
             android:name="com.yellowbambara.tatafo.AboutActivity"

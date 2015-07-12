@@ -5,7 +5,7 @@
     android:orientation="vertical"
     android:padding="6dip"
     android:baselineAligned="false"
-    android:background="@drawable/custom_selector_button">
+    android:background="@drawable/custom_selector_row">
 
     <TextView
         android:textColor="#fff"

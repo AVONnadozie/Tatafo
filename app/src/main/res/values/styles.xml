@@ -7,7 +7,6 @@
     </style>
     <style name="NoActionBarTheme"
         parent="@android:style/Theme.Holo.Light.NoActionBar">
-
     </style>
 
     <!-- ActionBar styles -->

@@ -13,7 +13,7 @@ import java.util.List;
 
 public class DOMParser {
 
-    private RSSFeed _feed = new RSSFeed();
+    private RSSFeed feed = new RSSFeed();
 
     public RSSFeed parseXml(String xmlUrl) {
 
@@ -21,7 +21,7 @@ public class DOMParser {
             SyndFeed f = RssAtomFeedRetriever.getMostRecentNews(xmlUrl);
             List<SyndEntry> entries = f.getEntries();
             //Try setting Feed Author
-            _feed.setAuthor(f.getAuthor());
+            feed.setAuthor(f.getAuthor());
 
             StringBuilder content = new StringBuilder();
             for (SyndEntry c : entries) {
@@ -29,12 +29,12 @@ public class DOMParser {
                 content = content.delete(0, content.length());
 
                 RSSItem item = new RSSItem();
-                item.setDate(c.getPublishedDate().toString());
+                item.setDate(c.getPublishedDate());
                 item.setTitle(c.getTitle());
 
                 //If feed author is not yet set, use item authors
-                if (_feed.getAuthor() == null || _feed.getAuthor().isEmpty()) {
-                     _feed.setAuthor(c.getAuthor() + " and others");
+                if (feed.getAuthor() == null || feed.getAuthor().isEmpty()) {
+                     feed.setAuthor(c.getAuthor() + " and others");
                 }
 
                 List contents = c.getContents();
@@ -45,8 +45,8 @@ public class DOMParser {
                     }
                     item.setContent(content.toString());
 
-                    //Try fetching image from content
-                    String img = "";
+                    //Try fetching image from html content
+                    String url = "";
                     String temp = content.toString().replaceAll("<", "&;").replaceAll(">", "&;");
                     for (String string : temp.split("&;")) {
                         if (!string.trim().matches("img[^<>]+/")) continue;
@@ -66,21 +66,21 @@ public class DOMParser {
                             }
                             if (icount > 1) break;
                         }
-                        img = b.toString();
+                        url = b.toString();
                         break;
                     }
 
-                    item.setImage(img);
+                    item.setImageURL(url);
                 }
 
-                _feed.addItem(item);
+                feed.addItem(item);
             }
 
         } catch (FetcherException | FeedException | IOException e) {
             Log.d("Tatafo debug", "Failed: " + e.getMessage());
         }
 
-        return _feed;
+        return feed;
 
     }
 
