@@ -1,3 +1,3 @@
 # Tatafo
 
-A news feed andriod app
+A news feed android app
